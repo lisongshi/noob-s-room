@@ -20,8 +20,8 @@ Pi = 3.1415926
 a = 6378137.0
 b = 6356752.0
 f = 1 / 298.2572236
-e = (((a ** 2) - (b ** 2)) ** 0.5) / a
-e_2 = (((a ** 2) - (b ** 2)) ** 0.5) / b
+e = ((a ** 2 - b ** 2) ** 0.5) / a
+e_2 = ((a ** 2 - b ** 2) ** 0.5) / b
 L_0 = (114.0 * Pi) / 180
 # WGS84椭球参数：a、b、f、e 、e_2分别为椭球长半轴、短半轴、扁率、第一偏心率、第二偏心率。
 # L_0为3度带中，38号带的中央子午线经度(弧度)
@@ -62,20 +62,20 @@ def BL_to_XY(B,L):
     #声明使用全局变量
     L1 = L - L_0
     #计算与中央子午线的经度差值
-    N = ( a * (1 - exp(e,2)) ) / exp( 1 - exp( e * sin(B), 2 ), 1.5 )
+    N = ( a * (1 - exp(e,2)) ) / exp( 1 - exp(e * sin(B),2),1.5 )
     #计算子午圈曲率半径
-    yita_exp2 = exp(e_2 * cos(B),2)
+    yita_exp2 = exp( e_2 * cos(B),2 )
     #计算yita的二次方
     X_meridian = a0 * B - sin(B) * cos(B) * \
                  ( (a2 - a4 + a6) + (2 * a4 - (16 / 3) * a6) * exp(sin(B),2) + (16 / 3) * a6 * exp(sin(B),4) )
     #计算子午线长度
-    t = exp(tan(B),2)
+    t = exp( tan(B),2 )
     #记t为tanB的平方，简化算式
     x = X_meridian + N * sin(B) * cos(B) * exp(L1,2) / ( 2 * exp(p,2) ) + \
         N * sin(B) * exp(cos(B),3) * ( 5 - t + 9 * yita_exp2 + 4 * exp(yita_exp2,2) ) * exp(L1,4) / ( 24 * exp(p,4) ) + \
         N * sin(B) * exp(cos(B),5) * ( 61 - 58 * t + exp(t,2) ) * exp(L1,6) / ( 720 * exp(p,6) )
-    y = N * cos(B) * L1 / p + N * exp(cos(B),3) * (1 - t + yita_exp2 ) * exp(L1,3) / (6 * exp(p,3)) + \
-        N * exp(cos(B),5) *( 5 - 18 * t + exp(t,2) + 14 * yita_exp2 - 58 * yita_exp2 * exp(t,2) ) * exp(L1,5) / (120 * exp(p,5))
+    y = N * cos(B) * L1 / p + N * exp(cos(B),3) * (1 - t + yita_exp2 ) * exp(L1,3) / ( 6 * exp(p,3) ) + \
+        N * exp(cos(B),5) *( 5 - 18 * t + exp(t,2) + 14 * yita_exp2 - 58 * yita_exp2 * exp(t,2) ) * exp(L1,5) / ( 120 * exp(p,5) )
     #搬运公式没啥好注释的。以后的bal不要嫌公式麻烦，我知道你肯定要吐槽的。
     y += 500000
     #避免y产生负值，加上500km
@@ -88,9 +88,9 @@ def data_exchange():
     data_output = open("Gps_point_info.txt",'w',encoding="utf-8")
     #原始数据为utf16小头编码，写入新数据时改为utf8节省空间
     point_info_2d = []
-    list = []
     #新建一个二维列表临时储存gps点信息
     i = 1
+    #用i计数，用来标注点号
     for line in data_input.readlines():
         point_info_1d = line.split()
         point_info_2d.append(point_info_1d)
@@ -121,7 +121,7 @@ def distance_calculate(info_2d):
     for index in range(0,len(info_2d)):
         dx = float(info_2d[index][1]) - float(info_2d[index + 1][1])
         dy = float(info_2d[index][2]) - float(info_2d[index + 1][2])
-        distance_sum += exp(exp(dx,2)+exp(dy,2),0.5)
+        distance_sum += exp( exp(dx,2) + exp(dy,2), 0.5 )
         if index + 2 == len(info_2d):
             break
     return distance_sum
@@ -131,7 +131,7 @@ def Main():
     #数据改写成大地平面坐标形式
     point_info_2d = point_read()
     #得到轨迹点数据的二维列表
-    Distance=distance_calculate(point_info_2d)
+    Distance = distance_calculate(point_info_2d)
     #计算浮点车一段时间内的总里程
     print("1h内总里程为：" + str(Distance) + 'm')
 
